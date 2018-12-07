@@ -3,7 +3,7 @@
 #+REVEAL_TRANS: slide
 #+REVEAL_THEME: black
 #+REVEAL_TITLE_SLIDE_BACKGROUND: ./images/nixos-logo-only-hires.png
-#+REVEAL_EXTRA_CSS: nix.css
+#+REVEAL_EXTRA_CSS: custom.css
 #+Title: Nix
 #+Author: Jos van Bakel
 #+Email: jos.van.bakel@wearespindle.com

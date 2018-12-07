@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="./reveal.js-3.7.0/css/theme/black.css" id="theme"/>
 
-<link rel="stylesheet" href="nix.css"/>
+<link rel="stylesheet" href="custom.css"/>
 
 <!-- If the query includes 'print-pdf', include the PDF print sheet -->
 <script>
@@ -27,12 +27,12 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide" data-background="./images/nixos-logo-only-hires.png"><h1 class="title">Nix</h1><h2 class="author">Jos van Bakel</h2><p class="date">Created: 2018-12-07 Fri 07:24</p>
+<section id="sec-title-slide" data-background="./images/nixos-logo-only-hires.png"><h1 class="title">Nix</h1><h2 class="author">Jos van Bakel</h2><p class="date">Created: 2018-12-07 Fri 07:28</p>
 </section>
 
 <section>
-<section id="slide-org73fabfb">
-<h2 id="org73fabfb">Agenda</h2>
+<section id="slide-org8561592">
+<h2 id="org8561592">Agenda</h2>
 <ul>
 <li>Intro</li>
 <li>Why Nix</li>
@@ -53,8 +53,8 @@ When you have questions, you can ask them directly.
 </section>
 </section>
 <section>
-<section id="slide-orgbb51d9e">
-<h2 id="orgbb51d9e">Intro</h2>
+<section id="slide-orgcbde3da">
+<h2 id="orgcbde3da">Intro</h2>
 <blockquote nil>
 <p>
 Nix is a powerful package manager for Linux and other Unix systems
@@ -102,13 +102,13 @@ solve.
 </section>
 </section>
 <section>
-<section id="slide-org9460bed">
-<h2 id="org9460bed">Why</h2>
-<div class="outline-text-2" id="text-org9460bed">
+<section id="slide-orga7945e2">
+<h2 id="orga7945e2">Why</h2>
+<div class="outline-text-2" id="text-orga7945e2">
 </div>
 </section>
-<section id="slide-org74bd12d">
-<h3 id="org74bd12d">Reproducibility</h3>
+<section id="slide-orgafde8a3">
+<h3 id="orgafde8a3">Reproducibility</h3>
 <p>
 How we build software
 </p>
@@ -143,8 +143,8 @@ baked system.
 </aside>
 
 </section>
-<section id="slide-orgd9b8f95">
-<h3 id="orgd9b8f95">Dependency hell</h3>
+<section id="slide-org44e572d">
+<h3 id="org44e572d">Dependency hell</h3>
 <blockquote nil>
 <p>
 The dependency issue arises around <span class="underline">shared packages</span> or <span class="underline">libraries</span> on
@@ -168,8 +168,8 @@ It's hard to have multiple versions installed.
 </aside>
 
 </section>
-<section id="slide-orgf99f13b">
-<h3 id="orgf99f13b">Dependency hell: Gentoo</h3>
+<section id="slide-org32e4ca4">
+<h3 id="org32e4ca4">Dependency hell: Gentoo</h3>
 
 <div class="figure">
 <p><img src="./images/dependency_hell_gentoo.jpg" alt="dependency_hell_gentoo.jpg" width="50%" height="50%" />
@@ -187,8 +187,8 @@ Gentoo Linux operating system. In total there are 14319 packages with
 </aside>
 
 </section>
-<section id="slide-org8956456">
-<h3 id="org8956456">Dependency hell: npm</h3>
+<section id="slide-org8138121">
+<h3 id="org8138121">Dependency hell: npm</h3>
 
 <div class="figure">
 <p><img src="./images/nodejs-dependencies.jpeg" alt="nodejs-dependencies.jpeg" />
@@ -197,8 +197,8 @@ Gentoo Linux operating system. In total there are 14319 packages with
 </div>
 
 </section>
-<section id="slide-org9e897d7">
-<h3 id="org9e897d7">Build environments</h3>
+<section id="slide-org2197c6e">
+<h3 id="org2197c6e">Build environments</h3>
 <p>
 It can get a mess.
 </p>
@@ -223,8 +223,8 @@ what if you do something different?
 </aside>
 
 </section>
-<section id="slide-org5d12509">
-<h3 id="org5d12509">Customizing packages</h3>
+<section id="slide-org55fddbb">
+<h3 id="org55fddbb">Customizing packages</h3>
 <ul>
 <li class="fragment appear">It's hard to customize packages.</li>
 <li class="fragment appear">Suppose you want Python with libressl.</li>
@@ -247,8 +247,8 @@ This is not developer friendly.
 </aside>
 
 </section>
-<section id="slide-org384f173">
-<h3 id="org384f173">Solutions</h3>
+<section id="slide-org975f426">
+<h3 id="org975f426">Solutions</h3>
 <ol>
 <li>Pipenv/virtualenv/nvm/rvm/etc.</li>
 <li>Salt/Puppet/Chef</li>
@@ -267,8 +267,8 @@ This is not developer friendly.
 </aside>
 
 </section>
-<section id="slide-org8d0fd8f">
-<h3 id="org8d0fd8f">Configuration management</h3>
+<section id="slide-orgc71043c">
+<h3 id="orgc71043c">Configuration management</h3>
 <div class="horizontal-figures">
 
 
@@ -336,13 +336,13 @@ A <i>build</i> docker image is congruent, but a doesn't have to be.
 </section>
 </section>
 <section>
-<section id="slide-org5da0f66">
-<h2 id="org5da0f66">A quick tour of Nix</h2>
-<div class="outline-text-2" id="text-org5da0f66">
+<section id="slide-orgd5e8857">
+<h2 id="orgd5e8857">A quick tour of Nix</h2>
+<div class="outline-text-2" id="text-orgd5e8857">
 </div>
 </section>
-<section id="slide-org6622dc5">
-<h3 id="org6622dc5">Packages</h3>
+<section id="slide-orgc1ead67">
+<h3 id="orgc1ead67">Packages</h3>
 <ul>
 <li>Each package gets it's own namespace:
 <ul>
@@ -374,8 +374,8 @@ This makes builds reproducible.
 </aside>
 
 </section>
-<section id="slide-orgf38d3b0">
-<h3 id="orgf38d3b0">Derivation</h3>
+<section id="slide-org918e82f">
+<h3 id="org918e82f">Derivation</h3>
 <p>
 The definition of a package is called a <b>derivation</b>.
 </p>
@@ -439,8 +439,8 @@ result/bin/swift
 </aside>
 
 </section>
-<section id="slide-orgcfd2c80">
-<h3 id="orgcfd2c80">Dependencies</h3>
+<section id="slide-org75ba43f">
+<h3 id="org75ba43f">Dependencies</h3>
 <p>
 Are linked to specific versions of libraries:
 </p>
@@ -455,8 +455,8 @@ Are linked to specific versions of libraries:
 </div>
 
 </section>
-<section id="slide-org9ee0e64">
-<h3 id="org9ee0e64">Dependencies (2)</h3>
+<section id="slide-org51a6417">
+<h3 id="org51a6417">Dependencies (2)</h3>
 <p>
 Interpreted executables are <i>wrapped</i> to set the appropriate
 environment for the exact dependency resolution:
@@ -482,8 +482,8 @@ environment and finally calls the actual Python rshell implementation.
 </aside>
 
 </section>
-<section id="slide-orgec5a026">
-<h3 id="orgec5a026">Profiles</h3>
+<section id="slide-org8768f75">
+<h3 id="org8768f75">Profiles</h3>
 
 <div class="figure">
 <p><img src="./images/nix-profile.jpg" alt="nix-profile.jpg" />
@@ -505,8 +505,8 @@ These are called <b>generations</b> and this allows you to rollback.
 </aside>
 
 </section>
-<section id="slide-org39f03bf">
-<h3 id="org39f03bf">Build sandbox</h3>
+<section id="slide-orge31c3c8">
+<h3 id="orge31c3c8">Build sandbox</h3>
 <ul>
 <li>Time is set to 1 (Unix timestamp).</li>
 <li>Most environment variables are cleared.</li>
@@ -533,8 +533,8 @@ are listed in the derivations (and checks the hashes).
 </aside>
 
 </section>
-<section id="slide-org4989f23">
-<h3 id="org4989f23">Build sandbox (2)</h3>
+<section id="slide-orgc0343d4">
+<h3 id="orgc0343d4">Build sandbox (2)</h3>
 
 <div class="figure">
 <p><img src="./images/python-build-env.png" alt="python-build-env.png" />
@@ -546,8 +546,8 @@ nil
 </aside>
 
 </section>
-<section id="slide-org87bf03f">
-<h3 id="org87bf03f">Build environments</h3>
+<section id="slide-org0ad3383">
+<h3 id="org0ad3383">Build environments</h3>
 <ul>
 <li>Create a build environment on demand with nix-shell.</li>
 <li>Akin virtualenv, Pipenv, etc. but language agnostic.</li>
@@ -580,8 +580,8 @@ python -c 'import requests; requests.get("<a href="http://google.nl">http://goog
 </aside>
 
 </section>
-<section id="slide-orgda442f1">
-<h3 id="orgda442f1">Use it!</h3>
+<section id="slide-org34e2183">
+<h3 id="org34e2183">Use it!</h3>
 <p>
 Install Nix on Linux or MacOS.
 </p>
@@ -608,8 +608,8 @@ Or if you want to take it one step further: try out NixOS!
 </section>
 </section>
 <section>
-<section id="slide-orgdf7de54">
-<h2 id="orgdf7de54">NixOS</h2>
+<section id="slide-orgcbc5167">
+<h2 id="orgcbc5167">NixOS</h2>
 <p>
 <i>The Purely Functional Linux Distribution</i>
 </p>
@@ -624,8 +624,8 @@ many other advantages.
 </blockquote>
 
 </section>
-<section id="slide-org4cf1657">
-<h3 id="org4cf1657">What is it</h3>
+<section id="slide-orga644c41">
+<h3 id="orga644c41">What is it</h3>
 <ul>
 <li>GNU/Linux OS build with Nix.</li>
 <li>Kernel, Bootloader and SystemD services.</li>
@@ -636,8 +636,8 @@ many other advantages.
 </ul>
 
 </section>
-<section id="slide-org5ecc753">
-<h3 id="org5ecc753">Declarative</h3>
+<section id="slide-org30edff8">
+<h3 id="org30edff8">Declarative</h3>
 <div class="org-src-container">
 
 <pre  class="src src-nix"><span style="color: #81b0e3;">{</span> config, pkgs, ... <span style="color: #81b0e3;">}</span>:
@@ -685,8 +685,8 @@ vm-test-3
 </aside>
 
 </section>
-<section id="slide-org3196c2f">
-<h3 id="org3196c2f">Reliable upgrades</h3>
+<section id="slide-orga0fdd60">
+<h3 id="orga0fdd60">Reliable upgrades</h3>
 <div class="org-src-container">
 
 <pre  class="src src-bash">$ nixos-rebuild build
@@ -726,8 +726,8 @@ It will <b>NOT</b> mutate anything, it will create a whole new fresh
 </aside>
 
 </section>
-<section id="slide-org21a1652">
-<h3 id="org21a1652">Atomic upgrades</h3>
+<section id="slide-orgade02e6">
+<h3 id="orgade02e6">Atomic upgrades</h3>
 <ul>
 <li>Transactional upgrades.</li>
 <li>Generations are stored beside each other.</li>
@@ -737,8 +737,8 @@ It will <b>NOT</b> mutate anything, it will create a whole new fresh
 </ul>
 
 </section>
-<section id="slide-orgef478d2">
-<h3 id="orgef478d2">Reproducible system configurations</h3>
+<section id="slide-org26094de">
+<h3 id="org26094de">Reproducible system configurations</h3>
 <p>
 If inputs are the same, result <i>should</i> be the same.
 </p>
@@ -762,13 +762,13 @@ together, you get a reproducible outcome.
 </section>
 </section>
 <section>
-<section id="slide-org8d0f04f">
-<h2 id="org8d0f04f">Conclusion</h2>
-<div class="outline-text-2" id="text-org8d0f04f">
+<section id="slide-org61332c8">
+<h2 id="org61332c8">Conclusion</h2>
+<div class="outline-text-2" id="text-org61332c8">
 </div>
 </section>
-<section id="slide-org461f07f">
-<h3 id="org461f07f">Cons</h3>
+<section id="slide-orgdf20cd3">
+<h3 id="orgdf20cd3">Cons</h3>
 <ul>
 <li class="fragment appear">New tool and language to learn.</li>
 <li class="fragment appear">Hard to debug problems.</li>
@@ -796,8 +796,8 @@ which focuses on fixing CVE's.
 </aside>
 
 </section>
-<section id="slide-orgda3e1b9">
-<h3 id="orgda3e1b9">Pros</h3>
+<section id="slide-org6614e7c">
+<h3 id="org6614e7c">Pros</h3>
 <ul>
 <li class="fragment appear">Huge repository of packages.</li>
 <li class="fragment appear">Easy to contribute a new package.</li>
@@ -830,15 +830,15 @@ modifying the source, hash, and dependencies.
 </section>
 </section>
 <section>
-<section id="slide-orga98bb02">
-<h2 id="orga98bb02">Questions?</h2>
+<section id="slide-org53f9de5">
+<h2 id="org53f9de5">Questions?</h2>
 <p>
 Lekker Nix doen!
 </p>
 
 </section>
-<section id="slide-org40833bb">
-<h3 id="org40833bb">Useful links</h3>
+<section id="slide-org758df4e">
+<h3 id="org758df4e">Useful links</h3>
 <ul>
 <li><a href="https://nixos.org/nixos/options.html">NixOS options</a></li>
 <li><a href="https://nixos.org/nixos/manual/index.html#ch-installation">NixOS installation</a></li>
@@ -849,8 +849,8 @@ Lekker Nix doen!
 </ul>
 
 </section>
-<section id="slide-orgd387c38">
-<h3 id="orgd387c38">Sources</h3>
+<section id="slide-org42a0b67">
+<h3 id="org42a0b67">Sources</h3>
 <p>
 <a href="https://nixos.org/nixos/about.html">https://nixos.org/nixos/about.html</a>
 <a href="https://www.slideshare.net/sandervanderburg/deploying-npm-packages-with-the-nix-package-manager">https://www.slideshare.net/sandervanderburg/deploying-npm-packages-with-the-nix-package-manager</a>
@@ -870,13 +870,13 @@ Lekker Nix doen!
 </section>
 </section>
 <section>
-<section id="slide-org9d7f1ca">
-<h2 id="org9d7f1ca">Advanced</h2>
-<div class="outline-text-2" id="text-org9d7f1ca">
+<section id="slide-orgfa3cd15">
+<h2 id="orgfa3cd15">Advanced</h2>
+<div class="outline-text-2" id="text-orgfa3cd15">
 </div>
 </section>
-<section id="slide-orga2525eb">
-<h3 id="orga2525eb">Deploying</h3>
+<section id="slide-orged26ae4">
+<h3 id="orged26ae4">Deploying</h3>
 <div class="org-src-container">
 
 <pre  class="src src-bash">nix-copy-closure ..
@@ -884,8 +884,8 @@ Lekker Nix doen!
 </div>
 
 </section>
-<section id="slide-org8c048ec">
-<h3 id="org8c048ec">Building statically linked packages</h3>
+<section id="slide-org85b7bdc">
+<h3 id="org85b7bdc">Building statically linked packages</h3>
 <div class="org-src-container">
 
 <pre  class="src src-bash">nix-build -E <span style="color: #bdbc61;">'with (import &lt;nixpkgs&gt; {}); (curl.override { stdenv = makeStaticLibraries stdenv;}).out'</span>
@@ -893,8 +893,8 @@ Lekker Nix doen!
 </div>
 
 </section>
-<section id="slide-org6aa8426">
-<h3 id="org6aa8426">Cross compilation</h3>
+<section id="slide-orgd2aeb81">
+<h3 id="orgd2aeb81">Cross compilation</h3>
 <div class="org-src-container">
 
 <pre  class="src src-bash">nix build -v -f channel:nixos-unstable pkgsCross.raspberryPi.hello
@@ -902,8 +902,8 @@ Lekker Nix doen!
 </div>
 
 </section>
-<section id="slide-orgd890d76">
-<h3 id="orgd890d76">Package with debug symbols:</h3>
+<section id="slide-orgf1aa7c0">
+<h3 id="orgf1aa7c0">Package with debug symbols:</h3>
 <div class="org-src-container">
 
 <pre  class="src src-bash">$ nix-build -E <span style="color: #bdbc61;">'with import &lt;nixpkgs&gt; {}; enableDebugging st'</span>
@@ -913,13 +913,13 @@ result/bin/st: ELF 64-bit LSB executable, x86-64, version 1 <span style="color: 
 </div>
 
 </section>
-<section id="slide-orgded7008">
-<h3 id="orgded7008">Nix in Docker:</h3>
-<div class="outline-text-3" id="text-orgded7008">
+<section id="slide-orge38ee9b">
+<h3 id="orge38ee9b">Nix in Docker:</h3>
+<div class="outline-text-3" id="text-orge38ee9b">
 </div>
 </section>
-<section id="slide-org8f5d5a4">
-<h4 id="org8f5d5a4">Nix</h4>
+<section id="slide-org579c33e">
+<h4 id="org579c33e">Nix</h4>
 <div class="org-src-container">
 
 <pre  class="src src-nix"><span style="color: #5180b3;">let</span>
@@ -943,8 +943,8 @@ stdenv.mkDerivation <span style="color: #5180b3;">rec</span> <span style="color:
 </div>
 
 </section>
-<section id="slide-org150dcc2">
-<h4 id="org150dcc2">Dockerfile</h4>
+<section id="slide-org2a72788">
+<h4 id="org2a72788">Dockerfile</h4>
 <div class="org-src-container">
 
 <pre  class="src src-dockerfile"><span style="color: #5180b3;">FROM</span> <span style="color: #cd5542; font-weight: bold;">nixos/nix</span>
