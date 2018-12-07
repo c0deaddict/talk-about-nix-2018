@@ -1,0 +1,617 @@
+#+OPTIONS: num:nil date:nil toc:nil
+#+REVEAL_ROOT: ./reveal.js-3.7.0
+#+REVEAL_TRANS: slide
+#+REVEAL_THEME: black
+#+REVEAL_TITLE_SLIDE_BACKGROUND: ./images/nixos-logo-only-hires.png
+#+REVEAL_EXTRA_CSS: nix.css
+#+Title: Nix
+#+Author: Jos van Bakel
+#+Email: jos.van.bakel@wearespindle.com
+#+Date: 2018-12-06
+
+
+# for different Themes see:
+# https://revealjs.com/?transition=none#/themes
+
+# press 's' for the speaker notes.
+
+* Agenda
+
+- Intro
+- Why Nix
+- Quick tour of Nix
+- NixOS
+- Conclusion
+- Demos in between
+
+#+BEGIN_NOTES
+When you have questions, you can ask them directly.
+#+END_NOTES
+
+* Intro
+
+#+BEGIN_QUOTE
+Nix is a powerful package manager for Linux and other Unix systems
+that makes package management _reliable_ and _reproducible_. It provides
+_atomic upgrades_ and _rollbacks_, side-by-side installation of _multiple
+versions_ of a package, multi-user package management and easy setup of
+build environments.
+#+END_QUOTE
+
+https://nixos.org/nix/
+
+#+BEGIN_NOTES
+Nix, sounds like the Dutch word for Nothing, was created by Eelco
+Dolstra in 2004.
+
+Nix started as a package manager that uses a *purely functional*
+programming language to define how *pure* packages are build.
+
+Pure means that a function only relies on it's inputs, not on some
+global state. The conditions under which a package is build is always
+the same. That is why the packages are *reproducible*.
+
+Somewhere in the last ten years NixOS was created on top of Nix.
+This is an operating system build with Nix.
+
+More about that later.
+First lets talk about why Nix was created, what problems it tries to
+solve.
+#+END_NOTES
+
+* Why
+
+** Reproducibility
+
+How we build software
+
+#+ATTR_REVEAL: :frag (appear)
+#+BEGIN_SRC bash
+apt install python libmysqlclient-dev
+wget .../emacs.tar.gz
+./configure ...
+make install
+#+END_SRC
+
+#+ATTR_REVEAL: :frag (appear)
+Through a /sequence/ of actions that /mutate/ the filesystem.
+
+#+BEGIN_NOTES
+- Problem: which version do you get?
+- What if you repeat this? (do you get the same version?)
+- It's hard to reproduce this.
+
+- What if you want to rollback? It's hard to undo changes.
+- It's not atomic, if some part of =apt= fails, you're left with a half
+baked system.
+#+END_NOTES
+
+** Dependency hell
+
+#+BEGIN_QUOTE
+The dependency issue arises around _shared packages_ or _libraries_ on
+which several other packages have dependencies but where they depend
+on different and _incompatible versions_ of the shared packages --
+Wikipedia
+#+END_QUOTE
+
+#+BEGIN_NOTES
+Dependency hell = software packages which have dependencies on
+specific versions of other software packages.
+
+In general: your system has one version of a package.
+It's hard to have multiple versions installed.
+#+END_NOTES
+
+** Dependency hell: Gentoo
+
+#+CAPTION: Gentoo packages dependencies
+#+ATTR_HTML: :width 50% :height 50%
+[[./images/dependency_hell_gentoo.jpg]]
+
+#+BEGIN_NOTES
+This graph shows the dependencies between software packages in the
+Gentoo Linux operating system. In total there are 14319 packages with
+63988 dependencies between them!
+#+END_NOTES
+
+** Dependency hell: npm
+
+#+CAPTION: Npm packages dependencies
+[[./images/nodejs-dependencies.jpeg]]
+# #+REVEAL_HTML: <iframe width="600px" height="600px" src="https://exploring-data.com/vis/npm-packages-dependencies/"></iframe>
+
+** Build environments
+
+It can get a mess.
+
+#+CAPTION: xkcd.com/1987
+[[./images/python_environment.png]]
+
+#+BEGIN_NOTES
+How do you rebuild your system?
+
+Through a sequence of /mutable/ steps, what if you forget something,
+what if you do something different?
+#+END_NOTES
+
+** Customizing packages
+
+#+ATTR_REVEAL: :frag (appear)
+- It's hard to customize packages.
+- Suppose you want Python with libressl.
+- Or OpenCV with GTK bindings.
+
+#+BEGIN_NOTES
+Then you'd have to download the sources,
+download or install all the dependencies,
+tweak the =configure= flags, compile the package,
+install it, and perhaps package it for others to use.
+
+This is not developer friendly.
+#+END_NOTES
+
+** Solutions
+
+1. Pipenv/virtualenv/nvm/rvm/etc.
+2. Salt/Puppet/Chef
+3. Docker
+4. Nix!
+
+#+BEGIN_NOTES
+1. It's not a solution to use a tool per language.
+2. for the other tools, next slide.
+#+END_NOTES
+
+** Configuration management
+
+#+REVEAL_HTML: <div class="horizontal-figures">
+
+#+CAPTION: Divergence
+[[./images/divergence.gif]]
+
+#+CAPTION: Convergence
+[[./images/convergence.gif]]
+
+#+CAPTION: Congruence
+[[./images/congruence.gif]]
+
+#+REVEAL_HTML: </div>
+
+#+BEGIN_NOTES
+Divergent:
+
+  Doing old fashioned mutable actions (playbook/instructions).
+
+Convergence: Salt/Puppet/Chef
+
+  What the tools do is basically:
+  - take a snapshot of the system
+  - compare against the desired state
+  - determine actions to execute to get system /closer/
+    to the desired state.
+
+Congruence: Docker/Nix
+
+  Docker kind of does this. When you use debian as base image, install
+  python, which version do you get?
+
+  A /build/ docker image is congruent, but a doesn't have to be.
+
+#+END_NOTES
+
+* A quick tour of Nix
+
+** Packages
+
+- Each package gets it's own namespace:
+  - =/nix/store/<hash>-hello.x.y=
+- Can install multiple versions of a package.
+- No more dependency hell.
+
+#+BEGIN_NOTES
+Hash depends on *ALL* inputs needed to build a package:
+- Sources
+- Libraries
+- Compilers
+- Build scripts
+- etc.
+
+This makes builds reproducible.
+#+END_NOTES
+
+** Derivation
+
+The definition of a package is called a *derivation*.
+
+#+BEGIN_SRC nix
+stdenv.mkDerivation rec {
+  name = "hello-${version}";
+  version = "2.10";
+
+  src = fetchurl {
+    url = "mirror://gnu/hello/${name}.tar.gz";
+    sha256 = "0ssi1wpaf7plaswqqjwigppsg...1i";
+  };
+
+  buildInputs = [ glibc ];
+};
+#+END_SRC
+
+#+BEGIN_NOTES
+Derivation is like a recipe for building a package.
+It specifies all the required ingredients (dependencies),
+including the required environment.
+
+Derivations are written in the *Nix expression language*.
+
+Here it uses the default build environment which is implicitly defined
+and uses gcc, make, and a bunch of other basic Unix build tools.
+
+Note the hash to guard the specific version of the hello source.
+
+DEMO
+
+cd examples/hello
+cat default.nix
+nix-build
+tree result
+result/bin/hello
+
+cd ../swiftclient
+cat package.nix
+nix-build
+tree result
+result/bin/swift
+#+END_NOTES
+
+** Dependencies
+
+Are linked to specific versions of libraries:
+
+#+BEGIN_SRC bash
+$ ldd result/bin/hello
+	linux-vdso.so.1
+	libc.so.6 => /nix/store/mrfc..sw-glibc-2.27/lib/libc.so.6
+	/nix/store/mrfc..sw-glibc-2.27/lib/ld-linux-x86-64.so.2 => ..
+#+END_SRC
+
+** Dependencies (2)
+
+Interpreted executables are /wrapped/ to set the appropriate
+environment for the exact dependency resolution:
+
+#+BEGIN_SRC bash
+$ cat /nix/store/jx69..gr-rshell-0.0.14/bin/rshell
+#! /nix/store/az8g..gs-bash-4.4-p23/bin/bash -e
+export PATH='/nix/store/6lm4..gn-python3-3.7.1/bin:..:$PATH'
+export PYTHONNOUSERSITE='true'
+exec -a "$0" "/nix/store/jx69../bin/.rshell-wrapped" \
+  "${extraFlagsArray[@]}" "$@"
+#+END_SRC
+
+#+BEGIN_NOTES
+Note: the =exec= calls another wrapper that sets up the Python
+environment and finally calls the actual Python rshell implementation.
+#+END_NOTES
+
+** Profiles
+
+[[./images/nix-profile.jpg]]
+
+#+BEGIN_NOTES
+Of course you don't want to remember the hashes of packages.
+Packages that you want to invoke directly are symlinked into your
+profile directory. This profile directory is placed in the =$PATH=.
+
+The profile is also a package! And can thus have multiple versions.
+These are called *generations* and this allows you to rollback.
+#+END_NOTES
+
+** Build sandbox
+
+- Time is set to 1 (Unix timestamp).
+- Most environment variables are cleared.
+- Designated temp and output folders are used.
+- Dependencies are immutable (read-only).
+- Only specified dependencies are available.
+- Build chroot namespace.
+- Network access is prohibited.
+
+#+BEGIN_NOTES
+Remember for a package (or function) to be pure, it must only rely on
+it's inputs. That means it cannot depend on global state. To
+enforce this the build sandbox has the following restrictions.
+
+Before entering the build sandbox, Nix will fetch all the sources that
+are listed in the derivations (and checks the hashes).
+#+END_NOTES
+
+** Build sandbox (2)
+
+[[./images/python-build-env.png]]
+
+#+BEGIN_NOTES
+#+END_NOTES
+
+** Build environments
+
+- Create a build environment on demand with nix-shell.
+- Akin virtualenv, Pipenv, etc. but language agnostic.
+- Includes /system/ packages like =libmysqlclient-dev=.
+
+#+BEGIN_SRC bash
+nix-shell -p python37Packages.requests
+#+END_SRC
+
+#+BEGIN_NOTES
+DEMO
+
+- Show a simple nix-shell with python3 and requests.
+  python --version
+  nix-shell -p python37Packages.requests
+  python --version
+  python -c 'import requests; requests.get("http://google.nl")'
+
+- Show voipgrid with custom script.
+#+END_NOTES
+
+** Use it!
+
+Install Nix on Linux or MacOS.
+
+https://nixos.org/nix/download.html
+
+#+BEGIN_QUOTE
+Because packages are pure, they have no dependencies on packages
+outside of the Nix store. This means that they should work on pretty
+much any GNU/Linux distribution.
+#+END_QUOTE
+
+#+BEGIN_NOTES
+Or if you want to take it one step further: try out NixOS!
+#+END_NOTES
+
+* NixOS
+
+/The Purely Functional Linux Distribution/
+
+#+BEGIN_QUOTE
+NixOS is a Linux distribution with a unique approach to package and
+_configuration management_. Built on top of the Nix package manager, it
+is completely _declarative_, makes upgrading systems _reliable_, and has
+many other advantages.
+#+END_QUOTE
+
+** What is it
+
+- GNU/Linux OS build with Nix.
+- Kernel, Bootloader and SystemD services.
+- Declarative configuration.
+- Immutable system.
+- Nixpkgs: huge repository of packages.
+
+** Declarative
+
+#+BEGIN_SRC nix
+{ config, pkgs, ... }:
+
+{
+  services.xserver.enable = true;
+  services.xserver.desktopManager = {
+    xfce.enable = true;
+    default = "xfce";
+  };
+  users.users.root.initialPassword = "root";
+
+  environment.systemPackages = with pkgs; [ vim git ssh ];
+}
+#+END_SRC
+
+#+BEGIN_SRC bash
+sudo nixos-rebuild build|test|boot|switch|..
+#+END_SRC
+
+#+BEGIN_NOTES
+DEMO
+
+cd examples/vm-test-1
+./build.sh
+# make sure nixos.qcow2 is deleted, otherwise vm won't start.
+rm nixos.qcow2
+./result/bin/run-nixos-vm
+
+repeat for:
+vm-test-2
+vm-test-3
+#+END_NOTES
+
+** Reliable upgrades
+
+#+BEGIN_SRC bash
+$ nixos-rebuild build
+result
+├── activate
+├── append-initrd-secrets -> /nix/store/mv93..rr-append-..
+├── bin
+│   └── switch-to-configuration
+├── configuration-name
+├── etc -> /nix/store/y5zg..yz-etc/etc
+├── extra-dependencies
+├── fine-tune
+├── firmware -> /nix/store/dizl..ly-firmware/lib/firmware
+├── init
+├── init-interface-version
+├── initrd -> /nix/store/rl1r..rr-initrd/initrd
+├── kernel -> /nix/store/4b9l..as-linux-4.19.6/bzImage
+├── kernel-modules -> /nix/store/97bh..8w-kernel-modules
+├── kernel-params
+├── nixos-version
+├── sw -> /nix/store/vqvz..5h-system-path
+├── system
+└── systemd -> /nix/store/7j4j..j3-systemd-239
+#+END_SRC
+
+#+BEGIN_NOTES
+NixOS rebuild will build a filesystem tree.
+
+It will *NOT* mutate anything, it will create a whole new fresh
+*generation* of your operating system.
+#+END_NOTES
+
+** Atomic upgrades
+
+- Transactional upgrades.
+- Generations are stored beside each other.
+- Generations can be garbage collected.
+- Rollback to older generations possible.
+
+** Reproducible system configurations
+
+If inputs are the same, result /should/ be the same.
+
+- Your configuration files.
+- A checkout of the nixpkgs repository.
+- Pin both and get a reproducible system.
+
+#+BEGIN_NOTES
+The only input is your configuration *AND* a checkout of the nixpkgs
+repository. When you pin that repository and your configuration
+together, you get a reproducible outcome.
+#+END_NOTES
+
+* Conclusion
+
+** Cons
+
+#+ATTR_REVEAL: :frag (appear)
+- New tool and language to learn.
+- Hard to debug problems.
+- Security.
+
+#+BEGIN_NOTES
+Nix language is not always trivial.
+If you have some experience with Haskell that helps.
+Debugging is hard because error messages are not human friendly (a bit
+like C).
+
+Security: the project is run by a small community, and ...
+
+however, since a few months there is a NixOS security team,
+which focuses on fixing CVE's.
+#+END_NOTES
+
+** Pros
+
+#+ATTR_REVEAL: :frag (appear)
+- Huge repository of packages.
+- Easy to contribute a new package.
+- Community driven.
+- Bleeding edge software.
+- Reproducible.
+- Reliable atomic upgrades.
+- Safe to test changes.
+- Customization.
+
+#+BEGIN_NOTES
+Huge repository of nixpkgs: currently 49173, also helps with learning
+the Nix language. There are so many examples to learn from.
+
+Contributing is easy: just make a PR against nixpkgs.
+
+Contributing a package is usually copying an existing derivation and
+modifying the source, hash, and dependencies.
+#+END_NOTES
+
+* Questions?
+
+Lekker Nix doen!
+
+** Useful links
+
+- [[https://nixos.org/nixos/options.html][NixOS options]]
+- [[https://nixos.org/nixos/manual/index.html#ch-installation][NixOS installation]]
+- [[https://nixos.org/nixos/packages.html][NixOS packages]]
+- [[https://nixos.org/nixpkgs/manual/][Nixpkgs manual]]
+- [[https://nixos.org/nixos/nix-pills/][Nix pills]]
+
+** Sources
+
+https://nixos.org/nixos/about.html
+https://www.slideshare.net/sandervanderburg/deploying-npm-packages-with-the-nix-package-manager
+https://medium.com/knerd/the-nine-circles-of-python-dependency-hell-481d53e3e025
+https://xkcd.com/1987/
+https://www.usenix.org/legacy/publications/library/proceedings/lisa02/tech/full_papers/traugott/traugott_html/index.html
+https://disfunksioneel.blogspot.com/2011/04/linux-software-dependencies.html
+https://lastlog.de/blog/posts/nodejs_on_nixos_status.html
+https://nbp.github.io/slides/FOSDEM/2015.Nix-NixOS-NixOps/
+https://github.com/Tokyo-NixOS/presentations/blob/master/2015/09/source.markdown
+https://exploring-data.com/vis/npm-packages-dependencies/
+https://container-solutions.com/step-towards-future-configuration-infrastructure-management-nix/
+
+
+
+* Advanced
+
+** Deploying
+
+#+BEGIN_SRC bash
+nix-copy-closure ..
+#+END_SRC
+
+** Building statically linked packages
+
+#+BEGIN_SRC bash
+nix-build -E 'with (import <nixpkgs> {}); (curl.override { stdenv = makeStaticLibraries stdenv;}).out'
+#+END_SRC
+
+** Cross compilation
+
+#+BEGIN_SRC bash
+nix build -v -f channel:nixos-unstable pkgsCross.raspberryPi.hello
+#+END_SRC
+
+** Package with debug symbols:
+
+#+BEGIN_SRC bash
+$ nix-build -E 'with import <nixpkgs> {}; enableDebugging st'
+$ file result/bin/st
+result/bin/st: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /nix/store/f111ij1fc83965m48bf2zqgiaq88fqv5-glibc-2.25/lib/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, not stripped, with debug_info
+#+END_SRC
+
+** Nix in Docker:
+
+*** Nix
+
+#+BEGIN_SRC nix
+let
+  opencv3WithGtk = python36Packages.opencv3.override {
+    enableGtk3 = true;
+    enableFfmpeg = true;
+  };
+in
+stdenv.mkDerivation rec {
+  # ...
+  buildInputs = [
+    (python36.withPackages(ps: with ps; [
+      aiohttp
+      numpy
+      netifaces
+    ]))
+    opencv3WithGtk
+  ];
+}
+#+END_SRC
+
+*** Dockerfile
+
+#+BEGIN_SRC dockerfile
+FROM nixos/nix
+ARG nixpkgs_commit
+ENV NIX_PATH="nixpkgs=https://github.com/NixOS/nixpkgs/archive/${nixpkgs_commit}.tar.gz"
+COPY default.nix .
+RUN nix-env -f default.nix -i '.*'
+COPY . /app
+WORKDIR /app
+ENTRYPOINT ["python3", "-u", "-m"]
+#+END_SRC

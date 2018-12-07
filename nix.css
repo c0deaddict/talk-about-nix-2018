@@ -1,0 +1,16 @@
+.reveal {
+    font-size: 38px;
+ }
+
+.figure p {
+    font-size: 24px;
+}
+
+.horizontal-figures {
+    display: flex;
+    margin-left: 75px !important;
+}
+
+.horizontal-figures .figure {
+    padding-right: 20px;
+}

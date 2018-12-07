@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Nix</title>
+<meta name="author" content="(Jos van Bakel)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="./reveal.js-3.7.0/css/reveal.css"/>
+
+<link rel="stylesheet" href="./reveal.js-3.7.0/css/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="nix.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = './reveal.js-3.7.0/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide" data-background="./images/nixos-logo-only-hires.png"><h1 class="title">Nix</h1><h2 class="author">Jos van Bakel</h2><p class="date">Created: 2018-12-07 Fri 07:24</p>
+</section>
+
+<section>
+<section id="slide-org73fabfb">
+<h2 id="org73fabfb">Agenda</h2>
+<ul>
+<li>Intro</li>
+<li>Why Nix</li>
+<li>Quick tour of Nix</li>
+<li>NixOS</li>
+<li>Conclusion</li>
+<li>Demos in between</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+When you have questions, you can ask them directly.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgbb51d9e">
+<h2 id="orgbb51d9e">Intro</h2>
+<blockquote nil>
+<p>
+Nix is a powerful package manager for Linux and other Unix systems
+that makes package management <span class="underline">reliable</span> and <span class="underline">reproducible</span>. It provides
+<span class="underline">atomic upgrades</span> and <span class="underline">rollbacks</span>, side-by-side installation of <span class="underline">multiple
+versions</span> of a package, multi-user package management and easy setup of
+build environments.
+</p>
+</blockquote>
+
+<p>
+<a href="https://nixos.org/nix/">https://nixos.org/nix/</a>
+</p>
+
+<aside class="notes">
+<p>
+Nix, sounds like the Dutch word for Nothing, was created by Eelco
+Dolstra in 2004.
+</p>
+
+<p>
+Nix started as a package manager that uses a <b>purely functional</b>
+programming language to define how <b>pure</b> packages are build.
+</p>
+
+<p>
+Pure means that a function only relies on it's inputs, not on some
+global state. The conditions under which a package is build is always
+the same. That is why the packages are <b>reproducible</b>.
+</p>
+
+<p>
+Somewhere in the last ten years NixOS was created on top of Nix.
+This is an operating system build with Nix.
+</p>
+
+<p>
+More about that later.
+First lets talk about why Nix was created, what problems it tries to
+solve.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org9460bed">
+<h2 id="org9460bed">Why</h2>
+<div class="outline-text-2" id="text-org9460bed">
+</div>
+</section>
+<section id="slide-org74bd12d">
+<h3 id="org74bd12d">Reproducibility</h3>
+<p>
+How we build software
+</p>
+
+<div class="org-src-container">
+
+<pre  class="fragment (appear)">apt install python libmysqlclient-dev
+wget .../emacs.tar.gz
+./configure ...
+make install
+</pre>
+</div>
+
+<p class="fragment (appear)">
+Through a <i>sequence</i> of actions that <i>mutate</i> the filesystem.
+</p>
+
+<aside class="notes">
+<ul>
+<li>Problem: which version do you get?</li>
+<li>What if you repeat this? (do you get the same version?)</li>
+<li>It's hard to reproduce this.</li>
+
+<li>What if you want to rollback? It's hard to undo changes.</li>
+<li>It's not atomic, if some part of <code>apt</code> fails, you're left with a half</li>
+
+</ul>
+<p>
+baked system.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgd9b8f95">
+<h3 id="orgd9b8f95">Dependency hell</h3>
+<blockquote nil>
+<p>
+The dependency issue arises around <span class="underline">shared packages</span> or <span class="underline">libraries</span> on
+which several other packages have dependencies but where they depend
+on different and <span class="underline">incompatible versions</span> of the shared packages &#x2013;
+Wikipedia
+</p>
+</blockquote>
+
+<aside class="notes">
+<p>
+Dependency hell = software packages which have dependencies on
+specific versions of other software packages.
+</p>
+
+<p>
+In general: your system has one version of a package.
+It's hard to have multiple versions installed.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgf99f13b">
+<h3 id="orgf99f13b">Dependency hell: Gentoo</h3>
+
+<div class="figure">
+<p><img src="./images/dependency_hell_gentoo.jpg" alt="dependency_hell_gentoo.jpg" width="50%" height="50%" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Gentoo packages dependencies</p>
+</div>
+
+<aside class="notes">
+<p>
+This graph shows the dependencies between software packages in the
+Gentoo Linux operating system. In total there are 14319 packages with
+63988 dependencies between them!
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org8956456">
+<h3 id="org8956456">Dependency hell: npm</h3>
+
+<div class="figure">
+<p><img src="./images/nodejs-dependencies.jpeg" alt="nodejs-dependencies.jpeg" />
+</p>
+<p><span class="figure-number">Figure 2: </span>Npm packages dependencies</p>
+</div>
+
+</section>
+<section id="slide-org9e897d7">
+<h3 id="org9e897d7">Build environments</h3>
+<p>
+It can get a mess.
+</p>
+
+
+<div class="figure">
+<p><img src="./images/python_environment.png" alt="python_environment.png" />
+</p>
+<p><span class="figure-number">Figure 3: </span>xkcd.com/1987</p>
+</div>
+
+<aside class="notes">
+<p>
+How do you rebuild your system?
+</p>
+
+<p>
+Through a sequence of <i>mutable</i> steps, what if you forget something,
+what if you do something different?
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org5d12509">
+<h3 id="org5d12509">Customizing packages</h3>
+<ul>
+<li class="fragment appear">It's hard to customize packages.</li>
+<li class="fragment appear">Suppose you want Python with libressl.</li>
+<li class="fragment appear">Or OpenCV with GTK bindings.</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+Then you'd have to download the sources,
+download or install all the dependencies,
+tweak the <code>configure</code> flags, compile the package,
+install it, and perhaps package it for others to use.
+</p>
+
+<p>
+This is not developer friendly.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org384f173">
+<h3 id="org384f173">Solutions</h3>
+<ol>
+<li>Pipenv/virtualenv/nvm/rvm/etc.</li>
+<li>Salt/Puppet/Chef</li>
+<li>Docker</li>
+<li>Nix!</li>
+
+</ol>
+
+<aside class="notes">
+<ol>
+<li>It's not a solution to use a tool per language.</li>
+<li>for the other tools, next slide.</li>
+
+</ol>
+
+</aside>
+
+</section>
+<section id="slide-org8d0fd8f">
+<h3 id="org8d0fd8f">Configuration management</h3>
+<div class="horizontal-figures">
+
+
+<div class="figure">
+<p><img src="./images/divergence.gif" alt="divergence.gif" />
+</p>
+<p><span class="figure-number">Figure 4: </span>Divergence</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./images/convergence.gif" alt="convergence.gif" />
+</p>
+<p><span class="figure-number">Figure 5: </span>Convergence</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./images/congruence.gif" alt="congruence.gif" />
+</p>
+<p><span class="figure-number">Figure 6: </span>Congruence</p>
+</div>
+
+</div>
+
+<aside class="notes">
+<p>
+Divergent:
+</p>
+
+<p>
+Doing old fashioned mutable actions (playbook/instructions).
+</p>
+
+<p>
+Convergence: Salt/Puppet/Chef
+</p>
+
+<p>
+What the tools do is basically:
+</p>
+<ul>
+<li>take a snapshot of the system</li>
+<li>compare against the desired state</li>
+<li>determine actions to execute to get system <i>closer</i>
+to the desired state.</li>
+
+</ul>
+
+<p>
+Congruence: Docker/Nix
+</p>
+
+<p>
+Docker kind of does this. When you use debian as base image, install
+python, which version do you get?
+</p>
+
+<p>
+A <i>build</i> docker image is congruent, but a doesn't have to be.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org5da0f66">
+<h2 id="org5da0f66">A quick tour of Nix</h2>
+<div class="outline-text-2" id="text-org5da0f66">
+</div>
+</section>
+<section id="slide-org6622dc5">
+<h3 id="org6622dc5">Packages</h3>
+<ul>
+<li>Each package gets it's own namespace:
+<ul>
+<li><code>/nix/store/&lt;hash&gt;-hello.x.y</code></li>
+
+</ul></li>
+<li>Can install multiple versions of a package.</li>
+<li>No more dependency hell.</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+Hash depends on <b>ALL</b> inputs needed to build a package:
+</p>
+<ul>
+<li>Sources</li>
+<li>Libraries</li>
+<li>Compilers</li>
+<li>Build scripts</li>
+<li>etc.</li>
+
+</ul>
+
+<p>
+This makes builds reproducible.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgf38d3b0">
+<h3 id="orgf38d3b0">Derivation</h3>
+<p>
+The definition of a package is called a <b>derivation</b>.
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-nix">stdenv.mkDerivation <span style="color: #5180b3;">rec</span> <span style="color: #81b0e3;">{</span>
+  <span style="color: #baba36;">name</span> = <span style="color: #bdbc61;">"hello-</span><span style="color: #dF9522;">$</span><span style="color: #a5a5a5;">{</span>version<span style="color: #a5a5a5;">}</span>";
+  <span style="color: #baba36;">version</span> = <span style="color: #bdbc61;">"2.10"</span>;
+
+  <span style="color: #baba36;">src</span> = fetchurl <span style="color: #a5a5a5;">{</span>
+    <span style="color: #baba36;">url</span> = <span style="color: #bdbc61;">"mirror://gnu/hello/</span><span style="color: #dF9522;">$</span><span style="color: #6190c3;">{</span>name<span style="color: #6190c3;">}</span><span style="color: #bdbc61;">.tar.gz"</span>;
+    <span style="color: #baba36;">sha256</span> = <span style="color: #bdbc61;">"0ssi1wpaf7plaswqqjwigppsg...1i"</span>;
+  <span style="color: #a5a5a5;">}</span>;
+
+  <span style="color: #baba36;">buildInputs</span> = <span style="color: #a5a5a5;">[</span> glibc <span style="color: #a5a5a5;">]</span>;
+<span style="color: #81b0e3;">}</span>;
+</pre>
+</div>
+
+<aside class="notes">
+<p>
+Derivation is like a recipe for building a package.
+It specifies all the required ingredients (dependencies),
+including the required environment.
+</p>
+
+<p>
+Derivations are written in the <b>Nix expression language</b>.
+</p>
+
+<p>
+Here it uses the default build environment which is implicitly defined
+and uses gcc, make, and a bunch of other basic Unix build tools.
+</p>
+
+<p>
+Note the hash to guard the specific version of the hello source.
+</p>
+
+<p>
+DEMO
+</p>
+
+<p>
+cd examples/hello
+cat default.nix
+nix-build
+tree result
+result/bin/hello
+</p>
+
+<p>
+cd ../swiftclient
+cat package.nix
+nix-build
+tree result
+result/bin/swift
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgcfd2c80">
+<h3 id="orgcfd2c80">Dependencies</h3>
+<p>
+Are linked to specific versions of libraries:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">$ ldd result/bin/hello
+    linux-vdso.so.1
+    libc.so.6 =&gt; /nix/store/mrfc..sw-glibc-2.27/lib/libc.so.6
+    /nix/store/mrfc..sw-glibc-2.27/lib/ld-linux-x86-64.so.2 =&gt; ..
+</pre>
+</div>
+
+</section>
+<section id="slide-org9ee0e64">
+<h3 id="org9ee0e64">Dependencies (2)</h3>
+<p>
+Interpreted executables are <i>wrapped</i> to set the appropriate
+environment for the exact dependency resolution:
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">$ cat /nix/store/jx69..gr-rshell-0.0.14/bin/rshell
+<span style="color: #656565;">#</span><span style="color: #757575;">! /nix/store/az8g..gs-bash-4.4-p23/bin/bash -e</span>
+<span style="color: #528fd1;">export</span> <span style="color: #baba36;">PATH</span>=<span style="color: #bdbc61;">'/nix/store/6lm4..gn-python3-3.7.1/bin:..:$PATH'</span>
+<span style="color: #528fd1;">export</span> <span style="color: #baba36;">PYTHONNOUSERSITE</span>=<span style="color: #bdbc61;">'true'</span>
+<span style="color: #5180b3;">exec</span> -a <span style="color: #bdbc61;">"$0"</span> <span style="color: #bdbc61;">"/nix/store/jx69../bin/.rshell-wrapped"</span> <span style="color: #bdbc61;">\</span>
+  <span style="color: #bdbc61;">"${extraFlagsArray[@]}"</span> <span style="color: #bdbc61;">"$@"</span>
+</pre>
+</div>
+
+<aside class="notes">
+<p>
+Note: the <code>exec</code> calls another wrapper that sets up the Python
+environment and finally calls the actual Python rshell implementation.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgec5a026">
+<h3 id="orgec5a026">Profiles</h3>
+
+<div class="figure">
+<p><img src="./images/nix-profile.jpg" alt="nix-profile.jpg" />
+</p>
+</div>
+
+<aside class="notes">
+<p>
+Of course you don't want to remember the hashes of packages.
+Packages that you want to invoke directly are symlinked into your
+profile directory. This profile directory is placed in the <code>$PATH</code>.
+</p>
+
+<p>
+The profile is also a package! And can thus have multiple versions.
+These are called <b>generations</b> and this allows you to rollback.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org39f03bf">
+<h3 id="org39f03bf">Build sandbox</h3>
+<ul>
+<li>Time is set to 1 (Unix timestamp).</li>
+<li>Most environment variables are cleared.</li>
+<li>Designated temp and output folders are used.</li>
+<li>Dependencies are immutable (read-only).</li>
+<li>Only specified dependencies are available.</li>
+<li>Build chroot namespace.</li>
+<li>Network access is prohibited.</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+Remember for a package (or function) to be pure, it must only rely on
+it's inputs. That means it cannot depend on global state. To
+enforce this the build sandbox has the following restrictions.
+</p>
+
+<p>
+Before entering the build sandbox, Nix will fetch all the sources that
+are listed in the derivations (and checks the hashes).
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org4989f23">
+<h3 id="org4989f23">Build sandbox (2)</h3>
+
+<div class="figure">
+<p><img src="./images/python-build-env.png" alt="python-build-env.png" />
+</p>
+</div>
+
+<aside class="notes">
+nil
+</aside>
+
+</section>
+<section id="slide-org87bf03f">
+<h3 id="org87bf03f">Build environments</h3>
+<ul>
+<li>Create a build environment on demand with nix-shell.</li>
+<li>Akin virtualenv, Pipenv, etc. but language agnostic.</li>
+<li>Includes <i>system</i> packages like <code>libmysqlclient-dev</code>.</li>
+
+</ul>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">nix-shell -p python37Packages.requests
+</pre>
+</div>
+
+<aside class="notes">
+<p>
+DEMO
+</p>
+
+<ul>
+<li>Show a simple nix-shell with python3 and requests.
+python &#x2013;version
+nix-shell -p python37Packages.requests
+python &#x2013;version
+python -c 'import requests; requests.get("<a href="http://google.nl">http://google.nl</a>")'</li>
+
+<li>Show voipgrid with custom script.</li>
+
+</ul>
+
+</aside>
+
+</section>
+<section id="slide-orgda442f1">
+<h3 id="orgda442f1">Use it!</h3>
+<p>
+Install Nix on Linux or MacOS.
+</p>
+
+<p>
+<a href="https://nixos.org/nix/download.html">https://nixos.org/nix/download.html</a>
+</p>
+
+<blockquote nil>
+<p>
+Because packages are pure, they have no dependencies on packages
+outside of the Nix store. This means that they should work on pretty
+much any GNU/Linux distribution.
+</p>
+</blockquote>
+
+<aside class="notes">
+<p>
+Or if you want to take it one step further: try out NixOS!
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orgdf7de54">
+<h2 id="orgdf7de54">NixOS</h2>
+<p>
+<i>The Purely Functional Linux Distribution</i>
+</p>
+
+<blockquote nil>
+<p>
+NixOS is a Linux distribution with a unique approach to package and
+<span class="underline">configuration management</span>. Built on top of the Nix package manager, it
+is completely <span class="underline">declarative</span>, makes upgrading systems <span class="underline">reliable</span>, and has
+many other advantages.
+</p>
+</blockquote>
+
+</section>
+<section id="slide-org4cf1657">
+<h3 id="org4cf1657">What is it</h3>
+<ul>
+<li>GNU/Linux OS build with Nix.</li>
+<li>Kernel, Bootloader and SystemD services.</li>
+<li>Declarative configuration.</li>
+<li>Immutable system.</li>
+<li>Nixpkgs: huge repository of packages.</li>
+
+</ul>
+
+</section>
+<section id="slide-org5ecc753">
+<h3 id="org5ecc753">Declarative</h3>
+<div class="org-src-container">
+
+<pre  class="src src-nix"><span style="color: #81b0e3;">{</span> config, pkgs, ... <span style="color: #81b0e3;">}</span>:
+
+<span style="color: #81b0e3;">{</span>
+  <span style="color: #baba36;">services.xserver.enable</span> = <span style="color: #528fd1;">true</span>;
+  <span style="color: #baba36;">services.xserver.desktopManager</span> = <span style="color: #a5a5a5;">{</span>
+    <span style="color: #baba36;">xfce.enable</span> = <span style="color: #528fd1;">true</span>;
+    <span style="color: #baba36;">default</span> = <span style="color: #bdbc61;">"xfce"</span>;
+  <span style="color: #a5a5a5;">}</span>;
+  <span style="color: #baba36;">users.users.root.initialPassword</span> = <span style="color: #bdbc61;">"root"</span>;
+
+  <span style="color: #baba36;">environment.systemPackages</span> = <span style="color: #5180b3;">with</span> pkgs; <span style="color: #a5a5a5;">[</span> vim git ssh <span style="color: #a5a5a5;">]</span>;
+<span style="color: #81b0e3;">}</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="src src-bash">sudo nixos-rebuild build|test|boot|switch|..
+</pre>
+</div>
+
+<aside class="notes">
+<p>
+DEMO
+</p>
+
+<p>
+cd examples/vm-test-1
+./build.sh
+</p>
+
+<p>
+rm nixos.qcow2
+./result/bin/run-nixos-vm
+</p>
+
+<p>
+repeat for:
+vm-test-2
+vm-test-3
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org3196c2f">
+<h3 id="org3196c2f">Reliable upgrades</h3>
+<div class="org-src-container">
+
+<pre  class="src src-bash">$ nixos-rebuild build
+result
+&#9500;&#9472;&#9472; activate
+&#9500;&#9472;&#9472; append-initrd-secrets -&gt; /nix/store/mv93..rr-append-..
+&#9500;&#9472;&#9472; bin
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; switch-to-configuration
+&#9500;&#9472;&#9472; configuration-name
+&#9500;&#9472;&#9472; etc -&gt; /nix/store/y5zg..yz-etc/etc
+&#9500;&#9472;&#9472; extra-dependencies
+&#9500;&#9472;&#9472; fine-tune
+&#9500;&#9472;&#9472; firmware -&gt; /nix/store/dizl..ly-firmware/lib/firmware
+&#9500;&#9472;&#9472; init
+&#9500;&#9472;&#9472; init-interface-version
+&#9500;&#9472;&#9472; initrd -&gt; /nix/store/rl1r..rr-initrd/initrd
+&#9500;&#9472;&#9472; kernel -&gt; /nix/store/4b9l..as-linux-4.19.6/bzImage
+&#9500;&#9472;&#9472; kernel-modules -&gt; /nix/store/97bh..8w-kernel-modules
+&#9500;&#9472;&#9472; kernel-params
+&#9500;&#9472;&#9472; nixos-version
+&#9500;&#9472;&#9472; sw -&gt; /nix/store/vqvz..5h-system-path
+&#9500;&#9472;&#9472; system
+&#9492;&#9472;&#9472; systemd -&gt; /nix/store/7j4j..j3-systemd-239
+</pre>
+</div>
+
+<aside class="notes">
+<p>
+NixOS rebuild will build a filesystem tree.
+</p>
+
+<p>
+It will <b>NOT</b> mutate anything, it will create a whole new fresh
+<b>generation</b> of your operating system.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-org21a1652">
+<h3 id="org21a1652">Atomic upgrades</h3>
+<ul>
+<li>Transactional upgrades.</li>
+<li>Generations are stored beside each other.</li>
+<li>Generations can be garbage collected.</li>
+<li>Rollback to older generations possible.</li>
+
+</ul>
+
+</section>
+<section id="slide-orgef478d2">
+<h3 id="orgef478d2">Reproducible system configurations</h3>
+<p>
+If inputs are the same, result <i>should</i> be the same.
+</p>
+
+<ul>
+<li>Your configuration files.</li>
+<li>A checkout of the nixpkgs repository.</li>
+<li>Pin both and get a reproducible system.</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+The only input is your configuration <b>AND</b> a checkout of the nixpkgs
+repository. When you pin that repository and your configuration
+together, you get a reproducible outcome.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-org8d0f04f">
+<h2 id="org8d0f04f">Conclusion</h2>
+<div class="outline-text-2" id="text-org8d0f04f">
+</div>
+</section>
+<section id="slide-org461f07f">
+<h3 id="org461f07f">Cons</h3>
+<ul>
+<li class="fragment appear">New tool and language to learn.</li>
+<li class="fragment appear">Hard to debug problems.</li>
+<li class="fragment appear">Security.</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+Nix language is not always trivial.
+If you have some experience with Haskell that helps.
+Debugging is hard because error messages are not human friendly (a bit
+like C).
+</p>
+
+<p>
+Security: the project is run by a small community, and &#x2026;
+</p>
+
+<p>
+however, since a few months there is a NixOS security team,
+which focuses on fixing CVE's.
+</p>
+
+</aside>
+
+</section>
+<section id="slide-orgda3e1b9">
+<h3 id="orgda3e1b9">Pros</h3>
+<ul>
+<li class="fragment appear">Huge repository of packages.</li>
+<li class="fragment appear">Easy to contribute a new package.</li>
+<li class="fragment appear">Community driven.</li>
+<li class="fragment appear">Bleeding edge software.</li>
+<li class="fragment appear">Reproducible.</li>
+<li class="fragment appear">Reliable atomic upgrades.</li>
+<li class="fragment appear">Safe to test changes.</li>
+<li class="fragment appear">Customization.</li>
+
+</ul>
+
+<aside class="notes">
+<p>
+Huge repository of nixpkgs: currently 49173, also helps with learning
+the Nix language. There are so many examples to learn from.
+</p>
+
+<p>
+Contributing is easy: just make a PR against nixpkgs.
+</p>
+
+<p>
+Contributing a package is usually copying an existing derivation and
+modifying the source, hash, and dependencies.
+</p>
+
+</aside>
+
+</section>
+</section>
+<section>
+<section id="slide-orga98bb02">
+<h2 id="orga98bb02">Questions?</h2>
+<p>
+Lekker Nix doen!
+</p>
+
+</section>
+<section id="slide-org40833bb">
+<h3 id="org40833bb">Useful links</h3>
+<ul>
+<li><a href="https://nixos.org/nixos/options.html">NixOS options</a></li>
+<li><a href="https://nixos.org/nixos/manual/index.html#ch-installation">NixOS installation</a></li>
+<li><a href="https://nixos.org/nixos/packages.html">NixOS packages</a></li>
+<li><a href="https://nixos.org/nixpkgs/manual/">Nixpkgs manual</a></li>
+<li><a href="https://nixos.org/nixos/nix-pills/">Nix pills</a></li>
+
+</ul>
+
+</section>
+<section id="slide-orgd387c38">
+<h3 id="orgd387c38">Sources</h3>
+<p>
+<a href="https://nixos.org/nixos/about.html">https://nixos.org/nixos/about.html</a>
+<a href="https://www.slideshare.net/sandervanderburg/deploying-npm-packages-with-the-nix-package-manager">https://www.slideshare.net/sandervanderburg/deploying-npm-packages-with-the-nix-package-manager</a>
+<a href="https://medium.com/knerd/the-nine-circles-of-python-dependency-hell-481d53e3e025">https://medium.com/knerd/the-nine-circles-of-python-dependency-hell-481d53e3e025</a>
+<a href="https://xkcd.com/1987/">https://xkcd.com/1987/</a>
+<a href="https://www.usenix.org/legacy/publications/library/proceedings/lisa02/tech/full_papers/traugott/traugott_html/index.html">https://www.usenix.org/legacy/publications/library/proceedings/lisa02/tech/full_papers/traugott/traugott_html/index.html</a>
+<a href="https://disfunksioneel.blogspot.com/2011/04/linux-software-dependencies.html">https://disfunksioneel.blogspot.com/2011/04/linux-software-dependencies.html</a>
+<a href="https://lastlog.de/blog/posts/nodejs_on_nixos_status.html">https://lastlog.de/blog/posts/nodejs_on_nixos_status.html</a>
+<a href="https://nbp.github.io/slides/FOSDEM/2015.Nix-NixOS-NixOps/">https://nbp.github.io/slides/FOSDEM/2015.Nix-NixOS-NixOps/</a>
+<a href="https://github.com/Tokyo-NixOS/presentations/blob/master/2015/09/source.markdown">https://github.com/Tokyo-NixOS/presentations/blob/master/2015/09/source.markdown</a>
+<a href="https://exploring-data.com/vis/npm-packages-dependencies/">https://exploring-data.com/vis/npm-packages-dependencies/</a>
+<a href="https://container-solutions.com/step-towards-future-configuration-infrastructure-management-nix/">https://container-solutions.com/step-towards-future-configuration-infrastructure-management-nix/</a>
+</p>
+
+
+
+</section>
+</section>
+<section>
+<section id="slide-org9d7f1ca">
+<h2 id="org9d7f1ca">Advanced</h2>
+<div class="outline-text-2" id="text-org9d7f1ca">
+</div>
+</section>
+<section id="slide-orga2525eb">
+<h3 id="orga2525eb">Deploying</h3>
+<div class="org-src-container">
+
+<pre  class="src src-bash">nix-copy-closure ..
+</pre>
+</div>
+
+</section>
+<section id="slide-org8c048ec">
+<h3 id="org8c048ec">Building statically linked packages</h3>
+<div class="org-src-container">
+
+<pre  class="src src-bash">nix-build -E <span style="color: #bdbc61;">'with (import &lt;nixpkgs&gt; {}); (curl.override { stdenv = makeStaticLibraries stdenv;}).out'</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-org6aa8426">
+<h3 id="org6aa8426">Cross compilation</h3>
+<div class="org-src-container">
+
+<pre  class="src src-bash">nix build -v -f channel:nixos-unstable pkgsCross.raspberryPi.hello
+</pre>
+</div>
+
+</section>
+<section id="slide-orgd890d76">
+<h3 id="orgd890d76">Package with debug symbols:</h3>
+<div class="org-src-container">
+
+<pre  class="src src-bash">$ nix-build -E <span style="color: #bdbc61;">'with import &lt;nixpkgs&gt; {}; enableDebugging st'</span>
+$ file result/bin/st
+result/bin/st: ELF 64-bit LSB executable, x86-64, version 1 <span style="color: #81b0e3;">(</span>SYSV<span style="color: #81b0e3;">)</span>, dynamically linked, interpreter /nix/store/f111ij1fc83965m48bf2zqgiaq88fqv5-glibc-2.25/lib/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, not stripped, with debug_info
+</pre>
+</div>
+
+</section>
+<section id="slide-orgded7008">
+<h3 id="orgded7008">Nix in Docker:</h3>
+<div class="outline-text-3" id="text-orgded7008">
+</div>
+</section>
+<section id="slide-org8f5d5a4">
+<h4 id="org8f5d5a4">Nix</h4>
+<div class="org-src-container">
+
+<pre  class="src src-nix"><span style="color: #5180b3;">let</span>
+  <span style="color: #baba36;">opencv3WithGtk</span> = python36Packages.opencv3.override <span style="color: #81b0e3;">{</span>
+    <span style="color: #baba36;">enableGtk3</span> = <span style="color: #528fd1;">true</span>;
+    <span style="color: #baba36;">enableFfmpeg</span> = <span style="color: #528fd1;">true</span>;
+  <span style="color: #81b0e3;">}</span>;
+<span style="color: #5180b3;">in</span>
+stdenv.mkDerivation <span style="color: #5180b3;">rec</span> <span style="color: #81b0e3;">{</span>
+  <span style="color: #757575;"># ...</span>
+  <span style="color: #baba36;">buildInputs</span> = <span style="color: #a5a5a5;">[</span>
+    <span style="color: #6190c3;">(</span>python36.withPackages<span style="color: #959595;">(</span>ps: <span style="color: #5180b3;">with</span> ps; <span style="color: #4170a3;">[</span>
+      aiohttp
+      numpy
+      netifaces
+    <span style="color: #4170a3;">]</span><span style="color: #959595;">)</span><span style="color: #6190c3;">)</span>
+    opencv3WithGtk
+  <span style="color: #a5a5a5;">]</span>;
+<span style="color: #81b0e3;">}</span>
+</pre>
+</div>
+
+</section>
+<section id="slide-org150dcc2">
+<h4 id="org150dcc2">Dockerfile</h4>
+<div class="org-src-container">
+
+<pre  class="src src-dockerfile"><span style="color: #5180b3;">FROM</span> <span style="color: #cd5542; font-weight: bold;">nixos/nix</span>
+<span style="color: #5180b3;">ARG</span> nixpkgs_commit
+<span style="color: #5180b3;">ENV</span> <span style="color: #baba36;">NIX_PATH</span>=<span style="color: #bdbc61;">"nixpkgs=https://github.com/NixOS/nixpkgs/archive/${nixpkgs_commit}.tar.gz"</span>
+<span style="color: #5180b3;">COPY</span> default.nix .
+<span style="color: #5180b3;">RUN</span> nix-env -f default.nix -i <span style="color: #bdbc61;">'.*'</span>
+<span style="color: #5180b3;">COPY</span> . /app
+<span style="color: #5180b3;">WORKDIR</span> /app
+<span style="color: #5180b3;">ENTRYPOINT</span> <span style="color: #81b0e3;">[</span><span style="color: #bdbc61;">"python3"</span>, <span style="color: #bdbc61;">"-u"</span>, <span style="color: #bdbc61;">"-m"</span><span style="color: #81b0e3;">]</span>
+</pre>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js-3.7.0/lib/js/head.min.js"></script>
+<script src="./reveal.js-3.7.0/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'slide', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: './reveal.js-3.7.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: './reveal.js-3.7.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: './reveal.js-3.7.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: './reveal.js-3.7.0/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: './reveal.js-3.7.0/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
