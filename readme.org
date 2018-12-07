@@ -3,7 +3,7 @@
 Here are the slides for the talk I gave about Nix at Thursday 6th of
 December at Spindle.
 
-The [[./nix.html][slides]] are generated from [[./nix.org][this]] Org file with [[https://github.com/yjwen/org-reveal/][org-reveal]].
+The [[https://c0deaddict.github.io/talk-about-nix-2018/][slides]] are generated from [[./index.org][this]] Org file with [[https://github.com/yjwen/org-reveal/][org-reveal]].
 If you want to do this yourself you need Emacs and install the
 org-reveal package. Then open the =nix.org= file and press =C-c C-e R
 R= this will generate the =nix.html= file.
