@@ -1,5 +1,5 @@
 #+OPTIONS: num:nil date:nil toc:nil
-#+REVEAL_ROOT: ./reveal.js-3.7.0
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
 #+REVEAL_TRANS: slide
 #+REVEAL_THEME: black
 #+REVEAL_TITLE_SLIDE_BACKGROUND: ./images/nixos-logo-only-hires.png
